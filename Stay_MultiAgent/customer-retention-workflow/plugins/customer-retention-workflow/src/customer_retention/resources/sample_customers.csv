@@ -1,0 +1,6 @@
+customer_id,tenure,monthly_charges,total_charges,contract,support_calls,complaints,is_active
+C001,2,89.5,179.0,month-to-month,5,2,1
+C002,48,42.0,2016.0,two-year,0,0,1
+C003,10,120.0,1200.0,month-to-month,3,1,1
+C004,36,65.0,2340.0,one-year,1,0,0
+C005,1,99.9,99.9,month-to-month,6,3,0

@@ -1,0 +1,45 @@
+services:
+  retention-workflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customer-retention-workflow:1.0.0
+    env_file:
+      - .env
+    environment:
+      RETENTION_CSV: ${RETENTION_CSV:-/app/src/customer_retention/resources/sample_customers.csv}
+      RETENTION_POLICY: ${RETENTION_POLICY:-/app/src/customer_retention/resources/politica_retencion.md}
+      RETENTION_MODEL: ${RETENTION_MODEL:-}
+    volumes:
+      # Mount the challenge data read-only to score the real dataset.
+      - ../../challenges:/app/challenges:ro
+      - ./out:/app/out
+    command:
+      - "--csv"
+      - "${RETENTION_CSV:-/app/src/customer_retention/resources/sample_customers.csv}"
+      - "--policy"
+      - "${RETENTION_POLICY:-/app/src/customer_retention/resources/politica_retencion.md}"
+      - "--out"
+      - "/app/out/report.json"
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customer-retention-workflow:1.0.0
+    entrypoint: ["streamlit", "run", "app/streamlit_app.py",
+                 "--server.address=0.0.0.0", "--server.port=8501",
+                 "--server.headless=true"]
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../../challenges:/app/challenges:ro
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: customer-retention-workflow:1.0.0
+    entrypoint: ["pytest"]
+    command: ["-q"]
+    profiles: ["ci"]

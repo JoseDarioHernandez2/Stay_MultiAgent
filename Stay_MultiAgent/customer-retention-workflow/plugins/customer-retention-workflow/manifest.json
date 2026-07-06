@@ -1,0 +1,68 @@
+{
+  "schema": "1.0",
+  "plugin": "customer-retention-workflow",
+  "version": "1.0.0",
+  "kind": "workflow",
+  "architecture": "multiagent",
+  "agents": [
+    {
+      "name": "retention-supervisor",
+      "role": "orchestrator",
+      "analyses": false
+    },
+    {
+      "name": "behavior-analyst",
+      "role": "analysis",
+      "artifact": "BehaviorReport"
+    },
+    {
+      "name": "value-analyst",
+      "role": "analysis",
+      "artifact": "ValueReport"
+    },
+    {
+      "name": "offer-specialist",
+      "role": "decision",
+      "artifact": "OfferProposal"
+    },
+    {
+      "name": "reviewer",
+      "role": "quality-gate",
+      "artifact": "ReviewResult"
+    }
+  ],
+  "contracts": [
+    "CustomerRecord",
+    "BehaviorReport",
+    "ValueReport",
+    "OfferProposal",
+    "ReviewResult",
+    "WorkflowDecision",
+    "AgentTrace",
+    "WorkflowResult"
+  ],
+  "quality_gate": {
+    "mandatory": true,
+    "statuses": [
+      "approve",
+      "reject",
+      "needs_revision"
+    ]
+  },
+  "human_in_the_loop": {
+    "trigger": "offer.cost > policy.approval_cost_threshold"
+  },
+  "parallelism": {
+    "concurrent_agents": [
+      "behavior-analyst",
+      "value-analyst"
+    ]
+  },
+  "entrypoint": "scripts/run_workflow.py",
+  "python_package": "customer_retention",
+  "ui": {
+    "framework": "streamlit",
+    "entrypoint": "app/streamlit_app.py",
+    "human_in_the_loop": true
+  }
+}

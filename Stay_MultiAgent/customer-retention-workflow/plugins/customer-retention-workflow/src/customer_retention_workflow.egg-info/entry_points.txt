@@ -1,0 +1,2 @@
+[console_scripts]
+retention-workflow = customer_retention.application.workflow:RetentionWorkflow
