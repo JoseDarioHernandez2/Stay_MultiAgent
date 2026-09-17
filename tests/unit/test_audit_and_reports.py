@@ -10,17 +10,11 @@ from customer_retention.application.recommendations import (
     RuleBasedRecommendationEngine,
     build_recommendation_engine,
 )
-from customer_retention.application.reporting import (
-    alerted_rows,
-    efficiency_metrics,
-    watchlist,
-)
+from customer_retention.application.reporting import alerted_rows, efficiency_metrics, watchlist
 from customer_retention.application.workflow import RetentionWorkflow
 from customer_retention.domain.contracts import CustomerRecord
 from customer_retention.domain.enums import ApprovalStatus, DecisionAction
-from customer_retention.infrastructure.report_builder import (
-    build_alert_report,
-)
+from customer_retention.infrastructure.report_builder import build_alert_report
 from customer_retention.tools.human_in_the_loop import AuditApprovalGateway
 
 _RES = Path(__file__).resolve().parents[2] / "src" / "customer_retention" / "resources"

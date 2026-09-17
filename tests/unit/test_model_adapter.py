@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 from customer_retention.domain.contracts import CustomerRecord
-from customer_retention.infrastructure.model_adapter import (
-    HeuristicChurnModel,
-    build_churn_model,
-)
+from customer_retention.infrastructure.model_adapter import HeuristicChurnModel, build_churn_model
 
 
 def test_heuristic_is_deterministic_and_bounded() -> None:

@@ -9,11 +9,7 @@ from customer_retention.domain.contracts import CustomerRecord, ValueReport
 from customer_retention.domain.enums import ImportanceLevel
 from customer_retention.infrastructure.tracing import TraceRecorder, TraceSpan
 from customer_retention.prompts.value import SYSTEM_PROMPT
-from customer_retention.tools.clv import (
-    compute_clv,
-    compute_cost_of_loss,
-    compute_expected_value,
-)
+from customer_retention.tools.clv import compute_clv, compute_cost_of_loss, compute_expected_value
 
 
 class ValueAnalystAgent(BaseAgent[tuple[CustomerRecord, float], ValueReport]):

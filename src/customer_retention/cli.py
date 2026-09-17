@@ -18,10 +18,7 @@ from typing import Any
 from customer_retention.application.workflow import RetentionWorkflow
 from customer_retention.infrastructure.data_loader import load_customers
 from customer_retention.infrastructure.logging_config import configure_logging
-from customer_retention.tools.human_in_the_loop import (
-    AutoApprovalGateway,
-    ConsoleApprovalGateway,
-)
+from customer_retention.tools.human_in_the_loop import AutoApprovalGateway, ConsoleApprovalGateway
 
 _LOGGER = logging.getLogger("retention-workflow")
 _RES = Path(__file__).resolve().parent / "resources"

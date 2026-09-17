@@ -7,14 +7,8 @@ import logging
 from pathlib import Path
 
 from customer_retention.domain.contracts import CustomerRecord
-from customer_retention.infrastructure.logging_config import (
-    JsonFormatter,
-    configure_logging,
-)
-from customer_retention.infrastructure.model_adapter import (
-    BaseModelAdapter,
-    build_churn_model,
-)
+from customer_retention.infrastructure.logging_config import JsonFormatter, configure_logging
+from customer_retention.infrastructure.model_adapter import BaseModelAdapter, build_churn_model
 
 _MODEL_SRC = '''\
 def predict_proba(features):

@@ -5,11 +5,7 @@ can ``from customer_retention import RetentionWorkflow``.
 """
 
 from customer_retention.application.workflow import RetentionWorkflow
-from customer_retention.domain.contracts import (
-    CustomerRecord,
-    WorkflowDecision,
-    WorkflowResult,
-)
+from customer_retention.domain.contracts import CustomerRecord, WorkflowDecision, WorkflowResult
 
 __all__ = [
     "RetentionWorkflow",

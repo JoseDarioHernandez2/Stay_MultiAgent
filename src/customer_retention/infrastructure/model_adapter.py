@@ -173,9 +173,7 @@ def build_churn_model_from_any(
     if src_path.suffix.lower() == ".pkl":
         # lazy import to keep model_adapter free of sklearn at import time
         # pylint: disable=import-outside-toplevel
-        from customer_retention.infrastructure.model_trainer import (
-            PickleModelAdapter,
-        )
+        from customer_retention.infrastructure.model_trainer import PickleModelAdapter
 
         return PickleModelAdapter(src_path)
     return build_churn_model(src_path)

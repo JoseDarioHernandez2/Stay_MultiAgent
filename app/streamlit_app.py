@@ -46,9 +46,7 @@ if str(_SRC) not in sys.path:
 
 # pylint: disable=wrong-import-position
 from customer_retention.application.policy import load_policy  # noqa: E402
-from customer_retention.application.recommendations import (  # noqa: E402
-    build_recommendation_engine,
-)
+from customer_retention.application.recommendations import build_recommendation_engine  # noqa: E402
 from customer_retention.application.reporting import (  # noqa: E402
     alerted_rows,
     build_table,
@@ -56,20 +54,11 @@ from customer_retention.application.reporting import (  # noqa: E402
     summarize,
 )
 from customer_retention.application.workflow import RetentionWorkflow  # noqa: E402
-from customer_retention.domain.contracts import (  # noqa: E402
-    CustomerRecord,
-    WorkflowResult,
-)
+from customer_retention.domain.contracts import CustomerRecord, WorkflowResult  # noqa: E402
 from customer_retention.infrastructure.data_loader import load_customers  # noqa: E402
-from customer_retention.infrastructure.model_adapter import (  # noqa: E402
-    build_churn_model_from_any,
-)
-from customer_retention.infrastructure.report_builder import (  # noqa: E402
-    build_alert_report,
-)
-from customer_retention.tools.human_in_the_loop import (  # noqa: E402
-    AuditApprovalGateway,
-)
+from customer_retention.infrastructure.model_adapter import build_churn_model_from_any  # noqa: E402
+from customer_retention.infrastructure.report_builder import build_alert_report  # noqa: E402
+from customer_retention.tools.human_in_the_loop import AuditApprovalGateway  # noqa: E402
 
 _MIME = {
     "json": "application/json",

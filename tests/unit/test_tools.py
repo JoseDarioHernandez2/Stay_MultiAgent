@@ -3,11 +3,7 @@
 from __future__ import annotations
 
 from customer_retention.domain.contracts import CustomerRecord
-from customer_retention.tools.clv import (
-    compute_clv,
-    compute_cost_of_loss,
-    compute_expected_value,
-)
+from customer_retention.tools.clv import compute_clv, compute_cost_of_loss, compute_expected_value
 
 
 def test_clv_is_non_negative_and_monotonic() -> None:

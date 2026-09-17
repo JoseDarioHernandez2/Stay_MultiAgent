@@ -6,11 +6,7 @@ from dataclasses import dataclass
 
 from customer_retention.agents.base import BaseAgent
 from customer_retention.application.policy import RetentionPolicy
-from customer_retention.domain.contracts import (
-    BehaviorReport,
-    OfferProposal,
-    ValueReport,
-)
+from customer_retention.domain.contracts import BehaviorReport, OfferProposal, ValueReport
 from customer_retention.domain.enums import RiskLevel
 from customer_retention.infrastructure.tracing import TraceRecorder, TraceSpan
 from customer_retention.prompts.offer import SYSTEM_PROMPT

@@ -1,4 +1,4 @@
-# See https://pre-commit.com for more information
+﻿# See https://pre-commit.com for more information
 # Install: pip install pre-commit && pre-commit install
 repos:
   - repo: https://github.com/psf/black

@@ -29,7 +29,6 @@ from customer_retention.domain.contracts import (
     ValueReport,
     WorkflowDecision,
 )
-from customer_retention.tools.clv import compute_clv
 from customer_retention.domain.enums import (
     ApprovalStatus,
     DecisionAction,
@@ -38,6 +37,7 @@ from customer_retention.domain.enums import (
     RiskLevel,
 )
 from customer_retention.domain.exceptions import AgentExecutionError
+from customer_retention.tools.clv import compute_clv
 from customer_retention.tools.human_in_the_loop import ApprovalGateway
 
 _LOGGER = logging.getLogger(__name__)

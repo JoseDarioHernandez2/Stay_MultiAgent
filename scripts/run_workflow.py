@@ -29,13 +29,9 @@ if _SRC.exists() and str(_SRC) not in sys.path:
 
 # pylint: disable=wrong-import-position
 
-from customer_retention.application.workflow import (  # noqa: E402
-    RetentionWorkflow,
-)
+from customer_retention.application.workflow import RetentionWorkflow  # noqa: E402
 from customer_retention.infrastructure.data_loader import load_customers  # noqa: E402
-from customer_retention.infrastructure.logging_config import (  # noqa: E402
-    configure_logging,
-)
+from customer_retention.infrastructure.logging_config import configure_logging  # noqa: E402
 from customer_retention.tools.human_in_the_loop import (  # noqa: E402
     AutoApprovalGateway,
     ConsoleApprovalGateway,
