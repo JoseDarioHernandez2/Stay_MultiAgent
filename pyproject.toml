@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Enterprise multi-agent workflow for customer churn retention."
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "Equipo 2 - Abandono"}]
 dependencies = [
     "pydantic>=2.5,<3.0",

@@ -11,7 +11,9 @@ WORKDIR /app
 
 # --- dependency layer (cached) ---
 COPY pyproject.toml README.md ./
-RUN pip install --upgrade pip && pip install ".[dev]"
+RUN mkdir -p src/customer_retention \
+    && pip install --upgrade pip \
+    && pip install ".[dev]"
 
 # --- application layer ---
 COPY src ./src
