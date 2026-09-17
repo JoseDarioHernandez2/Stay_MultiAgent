@@ -139,10 +139,9 @@ body {
 }
 .stApp { font-family: 'Inter', system-ui, sans-serif; }
 
-/* Sweeping "data aurora" band that glides across the screen. */
-.stApp {
-  position: relative;
-}
+/* Let the canvas (z-index:-1) sit behind Streamlit content naturally.
+   Explicit z-index on #root/.stApp creates stacking contexts that trap
+   the fixed-position canvas and break the layout — do NOT add them. */
 [data-testid="stAppViewContainer"]::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -209,44 +208,11 @@ iframe[title="st.iframe"] {
   pointer-events: none;
 }
 
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-  background: transparent !important;
-  color: var(--ink);
-}
-.stApp { font-family: 'Inter', system-ui, sans-serif; }
-
-/* Drifting colour blobs behind the neural canvas. */
-.stApp::before, .stApp::after {
-  content: "";
-  position: fixed;
-  width: 46vw;
-  height: 46vw;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.35;
-  z-index: 0;
-  pointer-events: none;
-}
-.stApp::before {
-  left: -12vw; top: -8vw;
-  background: radial-gradient(circle, #1e7fd6 0%, rgba(30,127,214,0) 70%);
-  animation: blob1 26s ease-in-out infinite alternate;
-}
-.stApp::after {
-  right: -14vw; bottom: -10vw;
-  background: radial-gradient(circle, #7c5cf6 0%, rgba(124,92,246,0) 70%);
-  animation: blob2 30s ease-in-out infinite alternate;
-}
-@keyframes blob1 {
-  0% { transform: translate(0,0) scale(1); }
-  100% { transform: translate(8vw,6vw) scale(1.15); }
-}
-@keyframes blob2 {
-  0% { transform: translate(0,0) scale(1); }
-  100% { transform: translate(-7vw,-5vw) scale(1.2); }
-}
-
-[data-testid="stMainBlockContainer"], .block-container {
+/* Broad selectors for cross-version Streamlit compatibility. */
+[data-testid="stMainBlockContainer"],
+[data-testid="stMain"],
+.block-container,
+section.main > div {
   position: relative;
   z-index: 1;
   padding-top: 1.2rem;
@@ -694,9 +660,11 @@ _NEURAL_JS = """
     var cv = doc.createElement('canvas');
     cv.id = 'neural-bg';
     cv.style.cssText =
-      'position:fixed;inset:0;width:100%;height:100%;z-index:0;' +
-      'opacity:0.9;pointer-events:none;';
-    doc.body.appendChild(cv);
+      'position:fixed;inset:0;width:100%;height:100%;z-index:-1;' +
+      'opacity:0.55;pointer-events:none;';
+    /* Insert inside .stApp so the canvas shares its stacking context. */
+    var root = doc.querySelector('.stApp') || doc.body;
+    root.insertBefore(cv, root.firstChild);
     var ctx = cv.getContext('2d');
     var dpr = win.devicePixelRatio || 1;
     var pal = ['#38e1ff', '#22d3ee', '#2dd4bf', '#8b7cf6', '#f472b6', '#fbbf24'];
