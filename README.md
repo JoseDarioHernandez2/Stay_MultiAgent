@@ -1,61 +1,190 @@
-# customer-retention-workflow
+<p align="center">
+  <img src="docs/dashboard_preview.png" alt="Stay — Núcleo de Retención Inteligente" width="820" />
+</p>
 
-**Enterprise multi-agent workflow for customer churn (abandono) prediction and
-retention.** Built for the MINE009 (Externado) multi-agent seminar — *Equipo 2:
-Abandono*.
+<h1 align="center">Stay · Multi-Agent Customer Retention Engine</h1>
 
-It combines a **predictive churn model**, **deterministic business code**, four
-**independent specialist agents**, **typed contracts**, a **mandatory quality
-gate**, **bounded iteration**, **structured traceability** and **human
-authority** (Human-in-the-Loop). It is *not* a single LLM call simulating
-roles — every agent executes separately and communicates only through validated
-artifacts.
+<p align="center">
+  <em>Enterprise-grade churn prediction &amp; retention workflow powered by independent specialist agents, typed contracts, and human-in-the-loop authority.</em>
+</p>
+
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="https://pydantic-docs.helpmanual.io/"><img src="https://img.shields.io/badge/pydantic-v2-E92063?style=flat-square&logo=pydantic&logoColor=white" alt="Pydantic v2"></a>
+  <a href="https://streamlit.io/"><img src="https://img.shields.io/badge/streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit"></a>
+  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/docker-compose-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker"></a>
+  <img src="https://img.shields.io/badge/tests-45%20passed-22c55e?style=flat-square" alt="Tests">
+  <img src="https://img.shields.io/badge/pylint-10.00%2F10-22c55e?style=flat-square" alt="Pylint 10/10">
+  <img src="https://img.shields.io/badge/mypy-strict%20✓-22c55e?style=flat-square" alt="mypy strict">
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License">
+</p>
+
+<p align="center">
+  <a href="#-quick-start">Quick Start</a> ·
+  <a href="#-architecture">Architecture</a> ·
+  <a href="#-multi-agent-execution">Multi-Agent Flow</a> ·
+  <a href="#-web-dashboard">Dashboard</a> ·
+  <a href="#-api-reference">API</a> ·
+  <a href="#-contributing">Contributing</a>
+</p>
 
 ---
 
-## 1. What it does
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Quick Start](#-quick-start)
+- [Architecture](#-architecture)
+- [Multi-Agent Execution](#-multi-agent-execution)
+- [Decision Logic](#-decision-logic)
+- [Artifact Contracts](#-artifact-contracts)
+- [Web Dashboard](#-web-dashboard)
+- [Synthetic Dataset](#-synthetic-dataset)
+- [Quality & Testing](#-quality--testing)
+- [Project Layout](#-project-layout)
+- [Design Principles](#-design-principles)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🔍 Overview
+
+**Stay** is an enterprise multi-agent workflow for customer churn prediction and retention, built for the **MINE009** multi-agent seminar at **Universidad Externado de Colombia** — *Equipo 2: Abandono*.
+
+It combines a **predictive churn model**, **deterministic business code**, four **independent specialist agents**, **typed contracts**, a **mandatory quality gate**, **bounded iteration**, **structured traceability**, and **human authority** (Human-in-the-Loop).
+
+> **This is not a single LLM call simulating roles.** Every agent executes separately and communicates only through validated, immutable Pydantic artifacts — no shared memory, no hallucinated fields.
+
+### What it does
 
 Given a dataset of customers, for each customer the workflow:
 
-1. Predicts the **probability of churn** with the base model.
-2. Quantifies the customer's **economic value** (CLV, cost of loss).
-3. Designs a **policy-compliant retention offer** (cost, discount, ROI).
-4. Passes everything through a **Reviewer quality gate**.
-5. Requests **human approval** when the offer cost exceeds the policy threshold.
-6. Consolidates a final, auditable **retention decision**.
+1. **Predicts** the probability of churn with the base model
+2. **Quantifies** the customer's economic value (CLV, cost of loss)
+3. **Designs** a policy-compliant retention offer (cost, discount, ROI)
+4. **Reviews** everything through a mandatory quality gate
+5. **Requests human approval** when the offer cost exceeds the policy threshold
+6. **Consolidates** a final, auditable retention decision
 
 ---
 
-## 2. Architecture (Clean / Hexagonal layering)
+## ✨ Key Features
+
+| Category | Details |
+|:---|:---|
+| **Multi-Agent Orchestration** | 5 independent agents (Supervisor + 4 specialists) with `asyncio.gather` parallelism |
+| **Typed Contracts** | Immutable Pydantic v2 models with `frozen=True`, `extra="forbid"` — hallucinated fields rejected at construction |
+| **Quality Gate** | Mandatory `Reviewer` agent validates every proposal; bounded re-delegation (max 1 retry) |
+| **Human-in-the-Loop** | Automatic escalation for offers exceeding the cost threshold; human acts as auditor, not blocker |
+| **Churn Prediction** | Random Forest / Gradient Boosting / Logistic Regression with AUC-ROC and cross-validation |
+| **Interactive Dashboard** | Premium dark-themed Streamlit UI with animated neural-network background, glassmorphism, and real-time KPIs |
+| **Export & Reporting** | JSON, PDF, and XLSX export of flagged offers for audit |
+| **Dockerized** | Multi-service `compose.yml` — CLI, UI, and CI test runner with a single build |
+| **Full Test Coverage** | 45 tests (unit / integration / contract), pylint 10/10, mypy strict, bandit clean |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- pip (or Docker)
+
+### Option A — Local Install
+
+```bash
+# Clone the repository
+git clone https://github.com/<your-username>/Stay_MultiAgent.git
+cd Stay_MultiAgent
+
+# Install with UI dependencies
+pip install -e ".[ui]"
+
+# Generate the synthetic dataset (optional)
+python scripts/generate_synthetic_dataset.py --rows 1000 --seed 42 \
+    --out-dir data --formats csv xlsx
+
+# Run the workflow
+python scripts/run_workflow.py \
+    --csv data/customers.csv \
+    --policy src/customer_retention/resources/politica_retencion.md \
+    --out report.json
+
+# Launch the web dashboard
+streamlit run app/streamlit_app.py
+```
+
+### Option B — Docker
+
+```bash
+docker compose build
+
+# Score the dataset (CLI)
+docker compose run --rm retention-workflow
+
+# Launch the web dashboard → http://localhost:8501
+docker compose up ui
+
+# Run the test suite
+docker compose --profile ci run --rm tests
+```
+
+### Option C — Make
+
+```bash
+make install-dev    # Install all dependencies
+make data           # Generate synthetic dataset
+make run            # Run the CLI workflow
+make ui             # Launch the Streamlit dashboard
+make test           # Run pytest with coverage
+make lint           # Run all linters
+```
+
+---
+
+## 🏗 Architecture
+
+The project follows **Clean / Hexagonal Architecture** with strict dependency inversion — the domain knows nothing about infrastructure; agents depend on domain contracts and protocol ports, never on concrete implementations.
 
 ```mermaid
 flowchart TD
-    subgraph interface[Interface]
-        CLI[scripts/run_workflow.py]
+    subgraph interface["🖥 Interface"]
+        CLI["scripts/run_workflow.py"]
+        UI["app/streamlit_app.py"]
     end
-    subgraph application[Application]
-        WF[RetentionWorkflow]
-        SUP[RetentionSupervisor]
-        POL[RetentionPolicy]
+    subgraph application["⚙️ Application"]
+        WF["RetentionWorkflow"]
+        SUP["RetentionSupervisor"]
+        POL["RetentionPolicy"]
+        REC["Recommendations"]
+        REP["Reporting"]
     end
-    subgraph agents[Agents]
-        BA[Behavior Analyst]
-        VA[Value Analyst]
-        OS[Offer Specialist]
-        RV[Reviewer]
+    subgraph agents["🤖 Agents"]
+        BA["Behavior Analyst"]
+        VA["Value Analyst"]
+        OS["Offer Specialist"]
+        RV["Reviewer"]
     end
-    subgraph domain[Domain]
-        CON[Contracts / Artifacts]
-        ENU[Enums]
-        EXC[Exceptions]
+    subgraph domain["📐 Domain"]
+        CON["Contracts / Artifacts"]
+        ENU["Enums"]
+        EXC["Exceptions"]
     end
-    subgraph infra[Infrastructure]
-        MODEL[Churn Model Adapter]
-        DATA[CSV Data Loader]
-        TRACE[Trace Recorder]
-        LOG[JSON Logging]
+    subgraph infra["🔧 Infrastructure"]
+        MODEL["Churn Model Adapter"]
+        DATA["CSV / XLSX Data Loader"]
+        TRACE["Trace Recorder"]
+        LOG["JSON Logging"]
+        TRAIN["Model Trainer"]
+        RBUILD["Report Builder"]
     end
-    CLI --> WF --> SUP
+    CLI --> WF
+    UI --> WF
+    WF --> SUP
     SUP --> BA & VA & OS & RV
     SUP --> POL
     BA --> MODEL
@@ -67,27 +196,23 @@ flowchart TD
     agents --> CON
 ```
 
-The dependency rule points inward: **domain** knows nothing about
-infrastructure; **agents** depend on domain contracts and infrastructure
-*ports* (protocols), never on concrete files.
-
 ---
 
-## 3. Multi-agent execution flow
+## 🔄 Multi-Agent Execution
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant S as Supervisor
-    participant B as Behavior Analyst
-    participant V as Value Analyst
-    participant O as Offer Specialist
-    participant R as Reviewer
-    participant H as Human (HITL)
+    participant S as 🎯 Supervisor
+    participant B as 📊 Behavior Analyst
+    participant V as 💰 Value Analyst
+    participant O as 🎁 Offer Specialist
+    participant R as ✅ Reviewer
+    participant H as 👤 Human (HITL)
 
     S->>B: run(CustomerRecord)
     S->>V: run(CustomerRecord, churn_p)
-    Note over S,V: Behavior & Value run concurrently
+    Note over S,V: ⚡ Behavior & Value run concurrently<br/>via asyncio.gather
     B-->>S: BehaviorReport
     V-->>S: ValueReport
     S->>O: run(BehaviorReport, ValueReport, Policy)
@@ -98,32 +223,35 @@ sequenceDiagram
         S->>H: request_approval(OfferProposal)
         H-->>S: APPROVED / REJECTED
     end
-    S-->>S: consolidate WorkflowDecision
+    S-->>S: consolidate → WorkflowDecision
 ```
 
-If the Reviewer returns `needs_revision`, the Supervisor re-delegates the offer
-**once** (bounded iteration) before consolidating.
+If the Reviewer returns `needs_revision`, the Supervisor re-delegates the offer **once** (bounded iteration) before consolidating — preventing infinite loops.
 
 ---
 
-## 4. Decision logic (risk + value + cost)
+## 🧠 Decision Logic
+
+The final retention decision combines **risk level**, **customer value**, and **offer cost**:
 
 ```mermaid
 flowchart TD
-    A[ReviewResult] -->|reject| ESC[ESCALATE]
-    A -->|approve / needs_revision| B{Offer cost ><br/>approval threshold?}
-    B -->|yes| H{Human approval}
-    H -->|rejected| MON[MONITOR - offer withdrawn]
-    H -->|approved| C{Risk & Value}
+    A["ReviewResult"] -->|reject| ESC["🚨 ESCALATE"]
+    A -->|approve / needs_revision| B{"Offer cost ><br/>approval threshold?"}
+    B -->|yes| H{"👤 Human approval"}
+    H -->|rejected| MON["👁 MONITOR — offer withdrawn"]
+    H -->|approved| C{"Risk × Value"}
     B -->|no| C
-    C -->|low risk & bronze| NA[NO_ACTION]
+    C -->|low risk & bronze| NA["⏸ NO_ACTION"]
     C -->|low risk| MON
-    C -->|medium+ risk| RET[RETAIN_WITH_OFFER]
+    C -->|medium+ risk| RET["✅ RETAIN_WITH_OFFER"]
 ```
 
 ---
 
-## 5. Artifact contracts (class diagram)
+## 📝 Artifact Contracts
+
+All inter-agent communication happens through **immutable Pydantic models** with `extra="forbid"` — a hallucinated field is rejected at construction, and agents cannot mutate a received artifact.
 
 ```mermaid
 classDiagram
@@ -136,7 +264,7 @@ classDiagram
     class BehaviorReport {
         +float churn_probability
         +RiskLevel risk_level
-        +list signals
+        +list~str~ signals
         +str model_name
     }
     class ValueReport {
@@ -165,189 +293,219 @@ classDiagram
     WorkflowDecision --> ReviewResult
 ```
 
-All artifacts are **immutable Pydantic models** with `extra="forbid"` — a
-hallucinated field is rejected at construction, and agents cannot mutate a
-received artifact (no shared memory).
-
 ---
 
-## 6. BPMN-simplified workflow
+## 🖥 Web Dashboard
 
-```mermaid
-flowchart LR
-    start((Start)) --> load[Load customers CSV]
-    load --> par{{Parallel gateway}}
-    par --> beh[Behavior analysis]
-    par --> val[Value analysis]
-    beh --> join{{Join}}
-    val --> join
-    join --> off[Design offer]
-    off --> rev[Quality gate review]
-    rev -->|needs revision| off
-    rev -->|reject| esc[Escalate]
-    rev -->|approve| gate{Cost > threshold?}
-    gate -->|yes| hitl[Human approval]
-    gate -->|no| dec[Consolidate decision]
-    hitl --> dec
-    esc --> done((End))
-    dec --> done
-```
+**Núcleo de Retención Inteligente** — A premium dark-themed dashboard with animated neural-network canvas, glassmorphism cards, and real-time monitoring.
 
----
-
-## 7. Install & run
+<p align="center">
+  <img src="docs/dashboard_preview.png" alt="Dashboard Preview" width="760" />
+</p>
 
 ```bash
-# from the plugin root
-pip install ".[dev]"
+# Local
+streamlit run app/streamlit_app.py
 
-# run over the challenge dataset
-python scripts/run_workflow.py \
-  --csv    challenges/session7/churn/customers.csv \
-  --policy challenges/session7/churn/politica_retencion.md \
-  --model  challenges/session7/model_base.py \
-  --out    report.json
+# Docker
+docker compose up ui    # → http://localhost:8501
 
-# interactive Human-in-the-Loop approvals
-python scripts/run_workflow.py --interactive
+# Make
+make ui
 ```
 
-### Docker
+### Dashboard Features
 
-```bash
-docker compose build
-docker compose run --rm retention-workflow          # scores the dataset (CLI)
-docker compose up ui                                # launches the web UI
-docker compose --profile ci run --rm tests          # runs the test suite
-```
+| Feature | Description |
+|:---|:---|
+| **Data Upload** | CSV / XLSX upload or bundled sample dataset + optional retention policy (`.md`) |
+| **KPI Row** | Analyzed, at-risk, retained, offer spend, value protected |
+| **Efficiency Gauge** | First-pass approval rate, mean latency, agent error count |
+| **Recommendations** | Up to 5 qualitative churn-mitigation insights (rule-based or Ollama-powered) |
+| **Priority Watch-list** | Top at-risk customers with risk badges |
+| **Alert Report** | Offers exceeding policy threshold flagged as `FLAGGED_FOR_AUDIT` — exportable as JSON, PDF, or XLSX |
+| **Model Training** | Train Random Forest / Gradient Boosting / Logistic Regression, view AUC-ROC + CV metrics, export `.pkl` |
 
 ---
 
-## 7-bis. Interactive web UI (Streamlit) — Núcleo de Retención Inteligente
+## 🗃 Synthetic Dataset
 
-Premium dark-themed dashboard (animated neural background, glassmorphism
-cards) layered on the same engine. **Operating model: the nucleus processes
-100% of the portfolio automatically; the human acts as an auditor, never as
-a blocking gate.**
-
-```bash
-pip install ".[ui]"
-streamlit run app/streamlit_app.py     # or: make ui / docker compose up ui
-```
-
-Features:
-
-- Upload `customers.csv` / `.xlsx` (or use the bundled sample) + optional
-  policy `.md` + optional model source (`.pkl` trained in-app or `model_base.py`).
-- **KPI row**: analysed, at-risk (alerted), retained, offer spend, value
-  protected.
-- **Efficiency gauge (velocímetro)** replacing per-customer trace listings:
-  first-pass approval rate, mean latency, agent error count.
-- **Recommendations panel**: up to 5 qualitative churn-mitigation bullets.
-  Rule-based engine by default; optional local **Ollama** connector (e.g.
-  `qwen2.5`) with automatic fallback to rules if the server is unreachable.
-- **Retention priority watch-list**: top at-risk customers with risk badges.
-- **Alert report button**: offers exceeding the policy threshold are flagged
-  (`FLAGGED_FOR_AUDIT`) — not blocked — and exported on demand as
-  **JSON, PDF or XLSX** for human audit.
-- **Entrenar Modelo tab**: train Random Forest / Gradient Boosting /
-  Logistic Regression, view AUC-ROC + CV metrics, export the `.pkl`.
-
----
-
-## 7-ter. Synthetic dataset for testing
-
-The project already runs with a small bundled sample and a deterministic
-heuristic model, so `pytest` and the demo work with **zero external files**. For
-realistic testing, a reproducible synthetic-data generator is included.
+The project runs with a bundled sample and a deterministic heuristic model — `pytest` and the demo work with **zero external files**. For realistic testing, a reproducible synthetic-data generator is included.
 
 ```bash
 python scripts/generate_synthetic_dataset.py --rows 1000 --seed 42 \
     --out-dir data --formats csv xlsx
 ```
 
-It writes `data/customers.csv` and `data/customers.xlsx` (the loader reads
-both). The data is intentionally **realistic, not over-acted**: a latent churn
-propensity is built from interpretable drivers (contract type, tenure, support
-pressure, complaints, auto-pay, products, activity) plus Gaussian noise, and the
-`churn` label is *sampled* — so classes overlap and are not perfectly separable.
+**Schema:** `customer_id`, `tenure`, `contract`, `monthly_charges`, `total_charges`, `num_products`, `support_calls`, `complaints`, `auto_pay`, `age`, `is_active`, `churn`
 
-Schema: `customer_id, tenure, contract, monthly_charges, total_charges,
-num_products, support_calls, complaints, auto_pay, age, is_active, churn`.
-The `churn` column is the target and is **never leaked** into the model features.
+The `churn` column is the target and is **never leaked** into model features.
 
-Typical output (seed 42, 1000 rows): ~27% churn rate; churn by contract
-month-to-month 36% > one-year 18% > two-year 13%; churn rises monotonically with
-support calls (17% → 47%).
+<details>
+<summary><b>Typical output characteristics (seed 42, 1 000 rows)</b></summary>
 
-Run the full workflow over it:
+| Metric | Value |
+|:---|---:|
+| Overall churn rate | ~27% |
+| Month-to-month churn | 36% |
+| One-year contract churn | 18% |
+| Two-year contract churn | 13% |
+| Churn by support calls | 17% → 47% (monotonic) |
 
-```bash
-python scripts/run_workflow.py --csv data/customers.xlsx \
-    --policy src/customer_retention/resources/politica_retencion.md \
-    --out report.json
-```
+Latent churn propensity is built from interpretable drivers (contract type, tenure, support pressure, complaints, auto-pay, products, activity) plus Gaussian noise, and the `churn` label is *sampled* — classes overlap intentionally and are not perfectly separable.
+
+</details>
 
 ---
 
-## 8. Quality
+## ✅ Quality & Testing
 
-| Tool     | Result |
-|----------|--------|
-| pytest   | **45 passed** |
-| pylint   | **10.00 / 10** |
-| mypy     | strict, **0 errors** |
-| flake8   | clean |
-| black / isort | formatted |
-| bandit   | no issues |
-| streamlit UI | flake8 / pylint 10 / mypy strict clean |
-
-Run everything:
+<table>
+<tr><td><b>Tool</b></td><td><b>Result</b></td></tr>
+<tr><td>pytest</td><td><img src="https://img.shields.io/badge/45%20passed-22c55e?style=flat-square" alt="45 passed"></td></tr>
+<tr><td>pylint</td><td><img src="https://img.shields.io/badge/10.00%20%2F%2010-22c55e?style=flat-square" alt="10/10"></td></tr>
+<tr><td>mypy</td><td><img src="https://img.shields.io/badge/strict%20·%200%20errors-22c55e?style=flat-square" alt="strict, 0 errors"></td></tr>
+<tr><td>flake8</td><td><img src="https://img.shields.io/badge/clean-22c55e?style=flat-square" alt="clean"></td></tr>
+<tr><td>black / isort</td><td><img src="https://img.shields.io/badge/formatted-22c55e?style=flat-square" alt="formatted"></td></tr>
+<tr><td>bandit</td><td><img src="https://img.shields.io/badge/no%20issues-22c55e?style=flat-square" alt="no issues"></td></tr>
+</table>
 
 ```bash
-black --check src scripts tests
-isort --check-only src scripts tests
-flake8 src scripts tests
+# Run everything
+make lint
+make test
+
+# Or individually
+pytest
 pylint src/customer_retention
 mypy src/customer_retention
 bandit -r src
-pytest
+black --check src scripts tests
 ```
 
 ---
 
-## 9. Project layout
+## 📁 Project Layout
 
 ```
-customer-retention-workflow/
-├── .codex-plugin/plugin.json        # plugin manifest (codex convention)
-├── manifest.json                    # architecture manifest
-├── skills/customer-retention-workflow/SKILL.md
-├── app/streamlit_app.py             # interactive web UI (Streamlit)
-├── scripts/run_workflow.py          # CLI entry point
-├── scripts/generate_synthetic_dataset.py  # reproducible test-data generator
-├── data/                            # generated customers.csv / customers.xlsx
-├── src/customer_retention/
-│   ├── domain/                      # contracts, enums, exceptions (pure)
-│   ├── application/                 # workflow, supervisor, policy, reporting
-│   ├── agents/                      # 4 independent agents + base
-│   ├── infrastructure/              # model adapter, data loader, logging, tracing
-│   ├── prompts/                     # per-agent prompt specs
-│   ├── tools/                       # CLV math, human-in-the-loop gateways
-│   └── resources/                   # sample dataset + policy (demo/tests)
-├── tests/                           # unit / integration / contract
-├── Dockerfile, compose.yml, .env.example
-└── pyproject.toml, .pylintrc, setup.cfg, .pre-commit-config.yaml
+Stay_MultiAgent/
+├── 📄 README.md
+├── 📄 INSTALL.md                         # Detailed installation guide
+├── 📄 pyproject.toml                     # PEP 621 project metadata
+├── 📄 Makefile                           # Task runner (install, test, lint, ui)
+├── 📄 Dockerfile                         # Multi-stage build (python:3.11-slim)
+├── 📄 compose.yml                        # CLI · UI · CI test services
+├── 📄 manifest.json                      # Architecture manifest (agents, contracts)
+├── 📄 .pre-commit-config.yaml            # Git hooks (black, isort, flake8)
+│
+├── 📂 app/
+│   └── streamlit_app.py                  # Interactive web dashboard (Streamlit)
+│
+├── 📂 scripts/
+│   ├── run_workflow.py                   # CLI entry point
+│   ├── generate_synthetic_dataset.py     # Reproducible test-data generator
+│   └── demo.py                           # Quick demonstration script
+│
+├── 📂 data/
+│   ├── customers.csv                     # Generated dataset
+│   └── customers.xlsx                    # Generated dataset (Excel)
+│
+├── 📂 models/
+│   └── churn_random_forest.pkl           # Pre-trained model
+│
+├── 📂 src/customer_retention/
+│   ├── 📂 domain/                        # Contracts, enums, exceptions (pure)
+│   │   ├── contracts.py                  # Pydantic artifacts (frozen, strict)
+│   │   ├── enums.py                      # RiskLevel, DecisionAction, ...
+│   │   └── exceptions.py                 # Domain-specific errors
+│   ├── 📂 application/                   # Workflow, supervisor, policy
+│   │   ├── workflow.py                   # RetentionWorkflow orchestrator
+│   │   ├── supervisor.py                 # RetentionSupervisor (delegation)
+│   │   ├── policy.py                     # RetentionPolicy rules
+│   │   ├── recommendations.py            # Rule-based + Ollama engine
+│   │   └── reporting.py                  # Portfolio-level analytics
+│   ├── 📂 agents/                        # 4 independent agents + base
+│   │   ├── base.py                       # Abstract agent protocol
+│   │   ├── behavior_analyst.py           # Churn probability + risk signals
+│   │   ├── value_analyst.py              # CLV + cost of loss
+│   │   ├── offer_specialist.py           # Retention offer design
+│   │   └── reviewer.py                   # Quality gate (approve/reject)
+│   ├── 📂 infrastructure/                # Adapters & I/O
+│   │   ├── model_adapter.py              # ChurnModelPort implementation
+│   │   ├── model_trainer.py              # Scikit-learn training pipeline
+│   │   ├── data_loader.py                # CSV / XLSX ingestion
+│   │   ├── report_builder.py             # PDF / XLSX report generation
+│   │   ├── tracing.py                    # Per-agent trace recorder
+│   │   └── logging_config.py             # Structured JSON logging
+│   ├── 📂 prompts/                       # Per-agent prompt specifications
+│   ├── 📂 tools/                         # CLV math, HITL gateway
+│   └── 📂 resources/                     # Sample dataset + default policy
+│
+├── 📂 skills/
+│   └── customer-retention-workflow/
+│       └── SKILL.md                      # Plugin skill definition
+│
+├── 📂 tests/
+│   ├── conftest.py                       # Shared fixtures
+│   ├── 📂 unit/                          # 11 unit test modules
+│   ├── 📂 integration/                   # End-to-end workflow tests
+│   └── 📂 contract/                      # Pydantic contract validation
+│
+└── 📂 docs/
+    └── dashboard_preview.png             # Dashboard screenshot
 ```
 
 ---
 
-## 10. Design principles applied
+## 🎯 Design Principles
 
-- **SOLID** — single-responsibility agents; dependency inversion via `Protocol`
-  ports (`ChurnModelPort`, `ApprovalGateway`).
-- **Clean / Hexagonal** — domain is pure; infrastructure is swappable.
-- **DRY / KISS / YAGNI** — shared helpers, deterministic tools, no speculative
-  abstraction.
-- **Robustness** — graceful degradation to a heuristic model; bounded iteration;
-  mandatory quality gate; the LLM never has total control.
+| Principle | Application |
+|:---|:---|
+| **SOLID** | Single-responsibility agents; dependency inversion via `Protocol` ports (`ChurnModelPort`, `ApprovalGateway`) |
+| **Clean / Hexagonal** | Domain is pure; infrastructure is swappable; dependency rule points inward |
+| **DRY / KISS / YAGNI** | Shared helpers, deterministic tools, no speculative abstraction |
+| **Robustness** | Graceful degradation to heuristic model; bounded iteration (max 1 re-delegation); mandatory quality gate |
+| **Human Authority** | The LLM never has total control — human approval required for high-cost decisions |
+| **Traceability** | Every agent execution produces a typed `AgentTrace`; full audit trail in structured JSON |
+| **Immutability** | All contracts are `frozen=True` with `extra="forbid"` — no shared mutable state between agents |
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|:---|:---|
+| **Language** | Python 3.11+ |
+| **Contracts** | Pydantic v2 (frozen, strict) |
+| **ML** | scikit-learn, joblib, numpy, pandas |
+| **UI** | Streamlit 1.33+, Plotly 5.20+ |
+| **Reports** | ReportLab (PDF), openpyxl (XLSX) |
+| **Container** | Docker (python:3.11-slim), Docker Compose |
+| **Quality** | pytest, pylint, mypy (strict), flake8, black, isort, bandit, radon |
+| **Hooks** | pre-commit (black + isort + flake8) |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Install dev dependencies (`pip install -e ".[dev]"`)
+4. Make your changes
+5. Run the quality suite (`make lint && make test`)
+6. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See `pyproject.toml` for details.
+
+---
+
+<p align="center">
+  Built with ❤️ by <b>Equipo 2 — Abandono</b><br/>
+  <em>MINE009 · Seminario de Modelos Multiagentes · Universidad Externado de Colombia</em>
+</p>
