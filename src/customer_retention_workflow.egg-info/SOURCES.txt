@@ -2,6 +2,7 @@ README.md
 pyproject.toml
 setup.cfg
 src/customer_retention/__init__.py
+src/customer_retention/cli.py
 src/customer_retention/agents/__init__.py
 src/customer_retention/agents/base.py
 src/customer_retention/agents/behavior_analyst.py

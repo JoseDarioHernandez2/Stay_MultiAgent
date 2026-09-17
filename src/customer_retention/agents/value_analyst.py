@@ -31,11 +31,34 @@ class ValueAnalystAgent(BaseAgent[tuple[CustomerRecord, float], ValueReport]):
         super().__init__(recorder)
         self._high_value_clv = high_value_clv
         self._prompt = SYSTEM_PROMPT
+        self._precomputed_clv: float | None = None
+
+    async def run(
+        self,
+        payload: tuple[CustomerRecord, float],
+        *,
+        precomputed_clv: float | None = None,
+    ) -> ValueReport:
+        """Execute the value analysis, optionally reusing a pre-computed CLV.
+
+        When the Supervisor has already computed CLV in parallel with the
+        Behavior agent (via :func:`asyncio.gather`), it passes the result
+        here to avoid redundant work.
+        """
+        self._precomputed_clv = precomputed_clv
+        try:
+            return await super().run(payload)
+        finally:
+            self._precomputed_clv = None
 
     async def _execute(self, payload: tuple[CustomerRecord, float], span: TraceSpan) -> ValueReport:
         """Compute CLV-derived metrics and tier the customer."""
         record, churn_probability = payload
-        clv = await asyncio.to_thread(compute_clv, record)
+        if self._precomputed_clv is not None:
+            clv = self._precomputed_clv
+            span.warn("CLV pre-computed in parallel by supervisor")
+        else:
+            clv = await asyncio.to_thread(compute_clv, record)
         expected = compute_expected_value(clv, churn_probability)
         cost_of_loss = compute_cost_of_loss(clv, churn_probability)
         importance = self._tier(clv)

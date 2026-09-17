@@ -5,7 +5,8 @@ services:
       dockerfile: Dockerfile
     image: customer-retention-workflow:1.0.0
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       RETENTION_CSV: ${RETENTION_CSV:-/app/src/customer_retention/resources/sample_customers.csv}
       RETENTION_POLICY: ${RETENTION_POLICY:-/app/src/customer_retention/resources/politica_retencion.md}
@@ -41,5 +42,5 @@ services:
       dockerfile: Dockerfile
     image: customer-retention-workflow:1.0.0
     entrypoint: ["pytest"]
-    command: ["-q"]
+    command: ["-v", "--tb=short"]
     profiles: ["ci"]

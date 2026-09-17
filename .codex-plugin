@@ -1,0 +1,5 @@
+{
+  "name": "customer-retention-workflow",
+  "version": "1.0.0",
+  "manifest": "manifest.json"
+}

@@ -42,7 +42,7 @@ dev = [
 ]
 
 [project.scripts]
-retention-workflow = "customer_retention.application.workflow:RetentionWorkflow"
+retention-workflow = "customer_retention.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -77,6 +77,9 @@ pythonpath = ["src"]
 [tool.coverage.run]
 source = ["customer_retention"]
 branch = true
+omit = [
+    "*/infrastructure/model_trainer.py",
+]
 
 [tool.coverage.report]
 show_missing = true

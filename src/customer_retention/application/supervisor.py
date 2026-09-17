@@ -29,6 +29,7 @@ from customer_retention.domain.contracts import (
     ValueReport,
     WorkflowDecision,
 )
+from customer_retention.tools.clv import compute_clv
 from customer_retention.domain.enums import (
     ApprovalStatus,
     DecisionAction,
@@ -108,18 +109,32 @@ class RetentionSupervisor:
     async def _run_analyses_in_parallel(
         self, record: CustomerRecord
     ) -> tuple[BehaviorReport, ValueReport]:
-        """Execute Behavior and Value analysts concurrently.
+        """Execute Behavior and Value analyses with maximum concurrency.
 
-        The Value analyst needs the churn probability, so the Supervisor runs
-        Behavior first only for its probability, then fans out. To honour the
-        parallelism requirement, both agents' heavy work runs concurrently:
-        Behavior computes the probability while Value computes CLV, and the
-        churn-weighted metrics are finalised from Behavior's result.
+        ``compute_clv(record)`` depends only on the customer record, not on the
+        churn probability. The Supervisor therefore launches the Behavior agent
+        (which runs the churn model) **and** the CLV computation concurrently
+        via :func:`asyncio.gather`. Once both complete, the Value agent
+        finalises the probability-dependent metrics (``expected_value``,
+        ``cost_of_loss``) using the churn probability from the Behavior report
+        and the pre-computed CLV — avoiding the sequential bottleneck.
         """
-        behavior_task = asyncio.create_task(self._behavior.run(record))
-        # Value analyst is seeded with a neutral probability, then refined.
-        behavior = await behavior_task
-        value = await self._value.run((record, behavior.churn_probability))
+        # Phase 1 — truly parallel: model prediction ∥ CLV computation
+        behavior, precomputed_clv = await asyncio.gather(
+            self._behavior.run(record),
+            asyncio.to_thread(compute_clv, record),
+        )
+        _LOGGER.debug(
+            "parallel phase complete for %s: p_churn=%.3f, clv=%.2f",
+            record.customer_id,
+            behavior.churn_probability,
+            precomputed_clv,
+        )
+        # Phase 2 — Value agent uses the pre-computed CLV + churn probability
+        value = await self._value.run(
+            (record, behavior.churn_probability),
+            precomputed_clv=precomputed_clv,
+        )
         return behavior, value
 
     async def _resolve_approval(

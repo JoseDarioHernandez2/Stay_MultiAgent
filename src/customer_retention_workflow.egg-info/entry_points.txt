@@ -1,2 +1,2 @@
 [console_scripts]
-retention-workflow = customer_retention.application.workflow:RetentionWorkflow
+retention-workflow = customer_retention.cli:main
